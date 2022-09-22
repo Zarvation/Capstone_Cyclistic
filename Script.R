@@ -1,5 +1,12 @@
 # Steps referenced to 
 # https://www.linkedin.com/pulse/google-data-analytics-capstone-project-ross-nelson/
+# Cleaning data steps in excel: 
+# Convert .csv to .xlsx
+# Adding ride_length column with formula (=Ended_Time-Started_Time)
+# Adding day_of_week column with formula (=Text(Started_Time;"dddd")
+# Adding month_ride column with formula (=Text(Started_Time;"mmyy")
+# Data ready to be used in R
+# Reasons i chose R is because the data is too big to be imported to SQL, plus i want to train my R programming.
 
 #Library used
 library(tidyverse)
@@ -8,7 +15,7 @@ library(lubridate)
 library(hms)
 library(readxl)
 
-#Import Data
+#Import Data or read xls file
 aug21=read_excel("data202108.xlsx")
 sep21=read_excel("data202109.xlsx")
 okt21=read_excel("data202110.xlsx")
