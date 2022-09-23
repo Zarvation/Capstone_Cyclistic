@@ -1,5 +1,5 @@
-# Steps referenced to 
-# https://www.linkedin.com/pulse/google-data-analytics-capstone-project-ross-nelson/
+# Because this is my first capstone project, i had doubt on where should i start so i referenced my steps to someone's findings in linkedin, but i do it in my own way.
+# reference: https://www.linkedin.com/pulse/google-data-analytics-capstone-project-ross-nelson/
 # Cleaning data steps in excel: 
 # Convert .csv to .xlsx
 # Adding ride_length column with formula (=Ended_Time-Started_Time)
@@ -60,7 +60,55 @@ jun22$ride_length <- minute(jun22$ride_length) + 60*hour(jun22$ride_length)
 jul22$ride_length <- minute(jul22$ride_length) + 60*hour(jul22$ride_length)
 aug22$ride_length <- minute(aug22$ride_length) + 60*hour(aug22$ride_length)
 
-aug21xl %>%
-ggplot(data = aug21xl, mapping = aes(x = day_of_week, y = sum(ride_length)))+geom_line()
+#order weekdays from monday to sunday
+aug21$day_of_week <- ordered(aug21$day_of_week, levels=c("Monday", "Tuesday", "Wednesday", "Thursday", 
+"Friday", "Saturday", "Sunday"))
+sep21$day_of_week <- ordered(sep21$day_of_week, levels=c("Monday", "Tuesday", "Wednesday", "Thursday", 
+"Friday", "Saturday", "Sunday"))
+okt21$day_of_week <- ordered(okt21$day_of_week, levels=c("Monday", "Tuesday", "Wednesday", "Thursday", 
+"Friday", "Saturday", "Sunday"))
+nov21$day_of_week <- ordered(nov21$day_of_week, levels=c("Monday", "Tuesday", "Wednesday", "Thursday", 
+"Friday", "Saturday", "Sunday"))
+dec21$day_of_week <- ordered(dec21$day_of_week, levels=c("Monday", "Tuesday", "Wednesday", "Thursday", 
+"Friday", "Saturday", "Sunday"))
+jan22$day_of_week <- ordered(jan22$day_of_week, levels=c("Monday", "Tuesday", "Wednesday", "Thursday", 
+"Friday", "Saturday", "Sunday"))
+feb22$day_of_week <- ordered(feb22$day_of_week, levels=c("Monday", "Tuesday", "Wednesday", "Thursday", 
+"Friday", "Saturday", "Sunday"))
+mar22$day_of_week <- ordered(mar22$day_of_week, levels=c("Monday", "Tuesday", "Wednesday", "Thursday", 
+"Friday", "Saturday", "Sunday"))
+apr22$day_of_week <- ordered(apr22$day_of_week, levels=c("Monday", "Tuesday", "Wednesday", "Thursday", 
+"Friday", "Saturday", "Sunday"))
+may22$day_of_week <- ordered(may22$day_of_week, levels=c("Monday", "Tuesday", "Wednesday", "Thursday", 
+"Friday", "Saturday", "Sunday"))
+jun22$day_of_week <- ordered(jun22$day_of_week, levels=c("Monday", "Tuesday", "Wednesday", "Thursday", 
+"Friday", "Saturday", "Sunday"))
+jul22$day_of_week <- ordered(jul22$day_of_week, levels=c("Monday", "Tuesday", "Wednesday", "Thursday", 
+"Friday", "Saturday", "Sunday"))
+aug22$day_of_week <- ordered(aug22$day_of_week, levels=c("Monday", "Tuesday", "Wednesday", "Thursday", 
+"Friday", "Saturday", "Sunday"))
+
+# Merge data with rbind
+data_combined <- rbind(aug21,sep21,okt21,nov21,dec21,jan22,feb22,mar22,apr22,may22,jun22,jul22,aug22)
+
+# Order month_ride
+data_combined$month_ride <- ordered(data_combined$month_ride, levels=c("0821", "0921", "1021", "1121", 
+"1221", "0122", "0222", "0322", "0422", "0522", "0622", "0722", "0822"))
+
+#Ride Data Visualization Count per Month and Type
+ggplot(data = aug21, mapping = aes(x = day_of_week,y=mean(ride_length),fill=day_of_week))+geom_bar(stat="identity")+facet_wrap(~member_casual)+
+theme(axis.text.x = element_text(angle = 45))+labs(title="August 2021",x="Day",y="Minutes")+
+geom_text(aes(label = mean(ride_length)), position = position_dodge(0.9))
+ggplot(data = aug22, mapping = aes(x = day_of_week,fill=day_of_week))+geom_bar()+facet_wrap(~member_casual)+
+theme(axis.text.x = element_text(angle = 45))+labs(title="August 2022")
+
+#Combined Ride Data Visualization Count per Month and Type
+data_combined %>%  
+ggplot(mapping = aes(x = day_of_week,fill=day_of_week))+geom_bar()+facet_wrap(~ month_ride + member_casual)+
+theme(axis.text.x = element_text(angle = 45))+labs(title="Data from 08-2021 to 08-2022")
+#Casual rider tend to ride more on the weekends
+#Member rider have consistent ride all weekdays
+
 
 str(aug21)
+str(data_combined)
