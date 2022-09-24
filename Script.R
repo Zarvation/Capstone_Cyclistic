@@ -1,4 +1,4 @@
-# Because this is my first capstone project, i had doubt on where should i start so i referenced my steps to someone's findings in linkedin, but i do it in my own way.
+# Because this is my first capstone project, i had doubt on where should i start so some of my steps are referenced by someone's.
 # reference: https://www.linkedin.com/pulse/google-data-analytics-capstone-project-ross-nelson/
 # Cleaning data steps in excel: 
 # Convert .csv to .xlsx
@@ -6,7 +6,7 @@
 # Adding day_of_week column with formula (=Text(Started_Time;"dddd")
 # Adding month_ride column with formula (=Text(Started_Time;"mmyy")
 # Data ready to be used in R
-# Reasons i chose R is because the data is too big to be imported to SQL, plus i want to train my R programming.
+# Reasons i chose R is because the data is too big to be imported to SQL, and  i want to train my R programming skills.
 
 #Library used
 library(tidyverse)
@@ -95,20 +95,183 @@ data_combined <- rbind(aug21,sep21,okt21,nov21,dec21,jan22,feb22,mar22,apr22,may
 data_combined$month_ride <- ordered(data_combined$month_ride, levels=c("0821", "0921", "1021", "1121", 
 "1221", "0122", "0222", "0322", "0422", "0522", "0622", "0722", "0822"))
 
-#Ride Data Visualization Count per Month and Type
-ggplot(data = aug21, mapping = aes(x = day_of_week,y=mean(ride_length),fill=day_of_week))+geom_bar(stat="identity")+facet_wrap(~member_casual)+
-theme(axis.text.x = element_text(angle = 45))+labs(title="August 2021",x="Day",y="Minutes")+
-geom_text(aes(label = mean(ride_length)), position = position_dodge(0.9))
-ggplot(data = aug22, mapping = aes(x = day_of_week,fill=day_of_week))+geom_bar()+facet_wrap(~member_casual)+
-theme(axis.text.x = element_text(angle = 45))+labs(title="August 2022")
 
-#Combined Ride Data Visualization Count per Month and Type
-data_combined %>%  
-ggplot(mapping = aes(x = day_of_week,fill=day_of_week))+geom_bar()+facet_wrap(~ month_ride + member_casual)+
-theme(axis.text.x = element_text(angle = 45))+labs(title="Data from 08-2021 to 08-2022")
-#Casual rider tend to ride more on the weekends
-#Member rider have consistent ride all weekdays
+#Total Ride Count by Customer type per Weekdays
+aug21 %>%   
+  group_by(member_casual, day_of_week) %>% 
+  summarise(total_rides=n()) %>%
+  ggplot(aes(x=day_of_week, y=total_rides, fill = member_casual))+
+  geom_col(position = position_dodge (width=0.9) , width = 0.9) + labs (x="Day of Week", y="Total Ride Count", 
+                                      title = "Total Ride Count by Customer type per Weekdays",
+						  subtitle = "August 2021", 
+                                      fill = "Membership Type") +
+  geom_text(aes(label = total_rides, angle = 90),
+    position = position_dodge(1),
+    vjust = 0.4,
+    hjust = 1.1,
+    size = 3
+  ) +
+  theme(axis.text.x = element_text (angle = 45))
+dec21 %>%   
+  group_by(member_casual, day_of_week) %>% 
+  summarise(total_rides=n()) %>%
+  ggplot(aes(x=day_of_week, y=total_rides, fill = member_casual))+
+  geom_col(position = position_dodge (width=0.9) , width = 0.9) + labs (x="Day of Week", y="Total Ride Count", 
+                                      title = "Total Ride Count by Customer type per Weekdays",
+						  subtitle = "December 2021", 
+                                      fill = "Membership Type") +
+  geom_text(aes(label = total_rides, angle = 90),
+    position = position_dodge(1),
+    vjust = 0.4,
+    hjust = 1.1,
+    size = 3
+  ) +
+  theme(axis.text.x = element_text (angle = 45))
+mar22 %>%   
+  group_by(member_casual, day_of_week) %>% 
+  summarise(total_rides=n()) %>%
+  ggplot(aes(x=day_of_week, y=total_rides, fill = member_casual))+
+  geom_col(position = position_dodge (width=0.9) , width = 0.9) + labs (x="Day of Week", y="Total Ride Count", 
+                                      title = "Total Ride Count by Customer type per Weekdays",
+						  subtitle = "March 2022", 
+                                      fill = "Membership Type") +
+  geom_text(aes(label = total_rides, angle = 90),
+    position = position_dodge(1),
+    vjust = 0.4,
+    hjust = 1.1,
+    size = 3
+  ) +
+  theme(axis.text.x = element_text (angle = 45))
+
+#Average Minutes per ride by Customer type on Weekdays
+
+aug21 %>%   
+  group_by(member_casual, day_of_week) %>% 
+  summarise(average_minutes=round(mean(ride_length), digits=2)) %>%
+  ggplot(aes(x=day_of_week, y=average_minutes, fill = member_casual))+
+  geom_col(position = position_dodge (width=0.9) , width = 0.9) + labs (x="Day of Week", y="Average Minutes", 
+                                      title = "Average length per ride by Customer type on Weekdays",
+						  subtitle = "August 2021", 
+                                      fill = "Membership Type") +
+  geom_text(aes(label = average_minutes, angle = 90),
+    position = position_dodge(1),
+    vjust = 0.4,
+    hjust = 1.1,
+    size = 3
+  )+
+  theme(axis.text.x = element_text (angle = 45))
+
+dec21 %>%   
+  group_by(member_casual, day_of_week) %>% 
+  summarise(average_minutes=round(mean(ride_length), digits=2)) %>%
+  ggplot(aes(x=day_of_week, y=average_minutes, fill = member_casual))+
+  geom_col(position = position_dodge (width=0.9) , width = 0.9) + labs (x="Day of Week", y="Average Minutes", 
+                                      title = "Average length per ride by Customer type on Weekdays",
+						  subtitle = "December 2021", 
+                                      fill = "Membership Type") +
+  geom_text(aes(label = average_minutes, angle = 90),
+    position = position_dodge(1),
+    vjust = 0.4,
+    hjust = 1.1,
+    size = 3
+  )+
+  theme(axis.text.x = element_text (angle = 45))
+
+mar22 %>%   
+  group_by(member_casual, day_of_week) %>% 
+  summarise(average_minutes=round(mean(ride_length), digits=2)) %>%
+  ggplot(aes(x=day_of_week, y=average_minutes, fill = member_casual))+
+  geom_col(position = position_dodge (width=0.9) , width = 0.9) + labs (x="Day of Week", y="Average Minutes", 
+                                      title = "Average length per ride by Customer type on Weekdays",
+						  subtitle = "March 2021", 
+                                      fill = "Membership Type") +
+  geom_text(aes(label = average_minutes, angle = 90),
+    position = position_dodge(1),
+    vjust = 0.4,
+    hjust = 1.1,
+    size = 3
+  )+
+  theme(axis.text.x = element_text (angle = 45))
+
+## Conclusion 1 based on total ride per month and average minutes ride per days:
+## Even though casual member rides are down sharply on the winter months, the average minutes of casual riders are still higher than the member's average minutes ride.
+## Casual riders number tend to rise on the weekends, whereas member riders have steady numbers throughout the week. this is also predictable
 
 
-str(aug21)
+#Combined Average ride length by Customer type and Day of Week
+data_combined %>%   
+  group_by(member_casual, day_of_week) %>% 
+  summarise(average_minutes = round(mean(ride_length),digits=2)) %>% 
+  ggplot(aes(x=day_of_week, y = average_minutes, fill = member_casual))+
+  geom_col(position = "dodge") + labs (x="Day of Week", y="Average Minutes", 
+                                      title = "Average Ride Length by Customer Type and Day of Week", 
+						  subtitle = "August 2021 - August 2022", 
+                                      fill = "Type of Membership") +
+  geom_text(aes(label = average_minutes, angle = 0),
+    position = position_dodge(1),
+    vjust = -0.6,
+    hjust = 0.5,
+    size = 3
+  )+
+  theme(axis.text.x = element_text (angle = 45))
+
+#Total ride by Customer Type per days in the past 1 year
+data_combined %>%   
+  group_by(member_casual, day_of_week) %>% 
+  summarise(total_rides=n()) %>%
+  ggplot(aes(x=day_of_week, y=total_rides, fill = member_casual))+
+  geom_col(position = position_dodge (width=0.9) , width = 0.9) + labs (x="Day of Week", y="Count", 
+                                      title = "Total ride by Customer Type per days in the past 1 year",
+						  subtitle = "August 2021 - August 2022", 
+                                      fill = "Membership Type") +
+  geom_text(aes(label = total_rides, angle = 90),
+    position = position_dodge(1),
+    vjust = 0.4,
+    hjust = 1.1,
+    size = 3
+  )+
+  theme(axis.text.x = element_text (angle = 45))
+
+#Total ride by Customer Type per Month in the past 1 year
+data_combined %>%   
+  group_by(member_casual, month_ride) %>% 
+  summarise(total_rides=n()) %>%
+  ggplot(aes(x=month_ride, y=total_rides, fill = member_casual))+
+  geom_col(position = position_dodge (width=0.9) , width = 0.9) + labs (x="Month", y="Count", 
+                                      title = "Total ride by Customer Type per Month in the past 1 year",
+						  subtitle = "August 2021 - August 2022", 
+                                      fill = "Membership Type") +
+  geom_text(aes(label = total_rides, angle = 90),
+    position = position_dodge(1),
+    vjust = 0.4,
+    hjust = 1.1,
+    size = 3
+  )+
+  theme(axis.text.x = element_text (angle = 45))
+
+## Conclusion 2:
+## Casual riders have double the average ride minutes of member riders
+## On colder months such as november - april, numbers of riders do go down.
+## overall we had more member riders ride throughout the weekdays, but more casual riders on the weekends.
+
+#Bicycle Type preferred by customer type in the past 1 year
+data_combined %>%   
+  group_by(member_casual, rideable_type) %>% 
+  summarise(total_rides=n()) %>%
+  ggplot(aes(x=rideable_type, y=total_rides, fill = member_casual))+
+  geom_col(position = position_dodge (width=0.9) , width = 0.9) + labs (x="Bicycle Type", y="Count", 
+                                      title = "Bicycle Type preferred by customer type in the past 1 year",
+						  subtitle = "August 2021 - August 2022", 
+                                      fill = "Membership Type") +
+  geom_text(aes(label = total_rides),
+    position = position_dodge(1),
+    vjust = -1,
+    hjust = 0.5,
+    size = 3
+  )
+## Conclusion 3:
+## Classic bike is preferred by member riders, whereas electric bikes are distributed evenly between member and casual riders.
+## docked bike are only used by casual riders.
+
+glimpse(aug21)
 str(data_combined)
