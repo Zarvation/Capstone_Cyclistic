@@ -1,18 +1,47 @@
-# Cleaning data steps in excel: 
-# Convert .csv to .xlsx
-# Adding ride_length column with formula (=Ended_Time-Started_Time)
-# Adding day_of_week column with formula (=Text(Started_Time;"dddd")
-# Adding month_ride column with formula (=Text(Started_Time;"mmyy")
-# Data ready to be used in R
-# Reasons i chose R is because the data is too big to be imported to SQL, and  i want to train my R programming skills.
+---
+title: "Capstone_Cyclistic"
+author: "Ellen"
+date: "2022-09-25"
+output: html_document
+---
 
-#Library used
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This is a report on my first capstone project from Google Data Analytics Course on the Cyclistic bike-share analysis case study.
+
+Cyclistic is a fictional bike-sharing company that is based in Chicago. The company want to understand how casual riders and annual members use Cyclistic bikes differently. From these insights, they will then design a new marketing strategy to convert casual riders into annual members. The question we need to answer is How do annual members and casual riders use Cyclistic bikes differently.
+
+## Getting Started
+
+To start on answering the question above, i first downloaded the previous 12 months of Cyclistic trip data from [here](https://divvy-tripdata.s3.amazonaws.com/index.html).
+
+## Cleaning Up Data
+
+After i downloaded said files, i convert them to .xlsx file and then do some data cleaning such as:
+
+* Adding ride_length column with formula (=Ended_Time-Started_Time)
+* Adding day_of_week column with formula (=Text(Started_Time;"dddd")
+* Adding month_ride column with formula (=Text(Started_Time;"mmyy")
+
+Now the excel data are ready to be analyzed with R. The Reason i chose R in this project is because of the data size, plus i want to familiarize myself with R.
+
+## Starting in R
+
+This is the library i will be using in this project:
+
+```{r, results='hide'}
 library(tidyverse)
 library(ggplot2)
 library(lubridate)
 library(readxl)
+```
+then i will be importing the .xlsx data such as:
 
-#Import Data or read xls file
+```{r, results='hide'}
 aug21 <- read_excel("data202108.xlsx")
 sep21 <- read_excel("data202109.xlsx")
 okt21 <- read_excel("data202110.xlsx")
@@ -26,8 +55,20 @@ may22 <- read_excel("data202205.xlsx")
 jun22 <- read_excel("data202206.xlsx")
 jul22 <- read_excel("data202207.xlsx")
 aug22 <- read_excel("data202208.xlsx")
+```
 
-#omit blank data
+the data imported will have structure as below, example (aug21 data)
+
+```{r}
+str (aug21)
+```
+
+## Cleaning Data in R
+
+The next step after importing the .xlsx data to R is cleaning the data.
+I will be omiting the row with empty data with :
+
+```{r}
 aug21 <- na.omit(aug21)
 sep21 <- na.omit(sep21)
 okt21 <- na.omit(okt21)
@@ -41,8 +82,19 @@ may22 <- na.omit(may22)
 jun22 <- na.omit(jun22)
 jul22 <- na.omit(jul22)
 aug22 <- na.omit(aug22) 
+```
 
-#convert ride_length to minutes
+So, current data after being cleaned of empty data should be like:
+
+```{r}
+str (aug21)
+```
+
+After omiting empty row data, i will convert the ride_length column to minutes because after importing the excel data to R, i found the column to be structured as datetime type.
+
+I will convert the data like this:
+
+```{r}
 aug21$ride_length <-
   minute(aug21$ride_length) + 60 * hour(aug21$ride_length)
 sep21$ride_length <-
@@ -69,9 +121,17 @@ jul22$ride_length <-
   minute(jul22$ride_length) + 60 * hour(jul22$ride_length)
 aug22$ride_length <-
   minute(aug22$ride_length) + 60 * hour(aug22$ride_length)
+```
 
-#order weekdays level from monday to sunday
+And current data should look like this:
 
+```{r}
+str (aug21)
+```
+
+Then i will order the day_of_week column level so i can have identical visualization result, i will sort the day_of_week column with:
+
+```{r}
 aug21$day_of_week <-
   ordered(
     aug21$day_of_week,
@@ -241,9 +301,13 @@ aug22$day_of_week <-
       "Sunday"
     )
   )
+```
 
-# Merge data with rbind
+## Merging all months data
 
+In this step, i will be adding new variable that contains all the 12 months data
+
+```{r}
 data_combined <-
   rbind(aug21,
         sep21,
@@ -258,9 +322,11 @@ data_combined <-
         jun22,
         jul22,
         aug22)
+```
 
-# Order month_ride
+and order the month_ride column level
 
+```{r}
 data_combined$month_ride <-
   ordered(
     data_combined$month_ride,
@@ -281,8 +347,15 @@ data_combined$month_ride <-
     )
   )
 
-#Total Ride Count by Customer type per Weekdays
+```
 
+## Analyzing Data
+
+#### (Monthly) Total Ride Count by Customer type per Weekdays
+
+First, i will be looking at how much each customer type rides throughout the weeks monthly, but i will only include visualization for August 2021 in this report.
+
+```{r}
 aug21 %>%
   group_by(member_casual, day_of_week) %>%
   summarise(total_rides = n()) %>%
@@ -302,47 +375,13 @@ aug21 %>%
     size = 4
   ) +
   theme(axis.text.x = element_text (angle = 45))
-dec21 %>%
-  group_by(member_casual, day_of_week) %>%
-  summarise(total_rides = n()) %>%
-  ggplot(aes(x = day_of_week, y = total_rides, fill = member_casual)) +
-  geom_col(position = position_dodge (width = 0.9) , width = 0.9) + labs (
-    x = "Day of Week",
-    y = "Total Ride Count",
-    title = "Total Ride Count by Customer type per Weekdays",
-    subtitle = "December 2021",
-    fill = "Membership Type"
-  ) +
-  geom_text(
-    aes(label = total_rides, angle = 90),
-    position = position_dodge(1),
-    vjust = 0.4,
-    hjust = 1.1,
-    size = 4
-  ) +
-  theme(axis.text.x = element_text (angle = 45))
-mar22 %>%
-  group_by(member_casual, day_of_week) %>%
-  summarise(total_rides = n()) %>%
-  ggplot(aes(x = day_of_week, y = total_rides, fill = member_casual)) +
-  geom_col(position = position_dodge (width = 0.9) , width = 0.9) + labs (
-    x = "Day of Week",
-    y = "Total Ride Count",
-    title = "Total Ride Count by Customer type per Weekdays",
-    subtitle = "March 2022",
-    fill = "Membership Type"
-  ) +
-  geom_text(
-    aes(label = total_rides, angle = 90),
-    position = position_dodge(1),
-    vjust = 0.4,
-    hjust = 1.1,
-    size = 4
-  ) +
-  theme(axis.text.x = element_text (angle = 45))
+```
 
-#Average Minutes per ride by Customer type on Weekdays
+#### (Monthly) Average Minutes per ride by Customer type on Weekdays
 
+Secondly, i will be looking at the average minutes each customer type rides throughout the weeks monthly, but i will only include visualization for August 2021 in this report.
+
+```{r}
 aug21 %>%
   group_by(member_casual, day_of_week) %>%
   summarise(average_minutes = round(mean(ride_length), digits = 2)) %>%
@@ -362,52 +401,20 @@ aug21 %>%
     size = 4
   ) +
   theme(axis.text.x = element_text (angle = 45))
+```
 
-dec21 %>%
-  group_by(member_casual, day_of_week) %>%
-  summarise(average_minutes = round(mean(ride_length), digits = 2)) %>%
-  ggplot(aes(x = day_of_week, y = average_minutes, fill = member_casual)) +
-  geom_col(position = position_dodge (width = 0.9) , width = 0.9) + labs (
-    x = "Day of Week",
-    y = "Average Minutes",
-    title = "Average length per ride by Customer type on Weekdays",
-    subtitle = "December 2021",
-    fill = "Membership Type"
-  ) +
-  geom_text(
-    aes(label = average_minutes, angle = 90),
-    position = position_dodge(1),
-    vjust = 0.4,
-    hjust = 1.1,
-    size = 4
-  ) +
-  theme(axis.text.x = element_text (angle = 45))
 
-mar22 %>%
-  group_by(member_casual, day_of_week) %>%
-  summarise(average_minutes = round(mean(ride_length), digits = 2)) %>%
-  ggplot(aes(x = day_of_week, y = average_minutes, fill = member_casual)) +
-  geom_col(position = position_dodge (width = 0.9) , width = 0.9) + labs (
-    x = "Day of Week",
-    y = "Average Minutes",
-    title = "Average length per ride by Customer type on Weekdays",
-    subtitle = "March 2021",
-    fill = "Membership Type"
-  ) +
-  geom_text(
-    aes(label = average_minutes, angle = 90),
-    position = position_dodge(1),
-    vjust = 0.4,
-    hjust = 1.1,
-    size = 4
-  ) +
-  theme(axis.text.x = element_text (angle = 45))
+Conclusion 1 based on total rides and average minutes per days:
 
-## Conclusion 1 based on total ride per month and average minutes ride per days:
-## Even though casual member rides are down sharply on the winter months, the average minutes of casual riders are still higher than the member's average minutes ride.
-## Casual riders number tend to rise on the weekends, whereas member riders have steady numbers throughout the week. this is also predictable
+* Casual riders number tend to rise on the weekends, whereas member riders have steady numbers throughout the week.
+* Casual riders have almost 2x average minutes ride than member riders.
 
-#Combined Data differences in member types
+
+#### Difference between the casual rider and member rider
+
+next i will be looking at how much each membership type riders are with:
+
+```{r}
 data_combined %>% 
   group_by(member_casual) %>%
   summarise(total_rides = n()) %>% 
@@ -426,8 +433,15 @@ data_combined %>%
     hjust = 0.5,
     size = 4
   )
+```
 
-#Combined Average ride length by Customer type and Day of Week
+Turns out 42.4% of the riders are casual members, this mean almost half of the riders are non-membership type.
+
+#### (Yearly) Average ride length by Customer type and Day of Week
+
+Next i will be looking for the average ride length by customer type each day for the past 12 months
+
+```{r}
 data_combined %>%
   group_by(member_casual, day_of_week) %>%
   summarise(average_minutes = round(mean(ride_length), digits = 2)) %>%
@@ -447,8 +461,15 @@ data_combined %>%
     size = 4
   ) +
   theme(axis.text.x = element_text (angle = 45))
+```
 
-#Total ride by Customer Type per days in the past 1 year
+The data here is not much different from the monthly one, the member riders have steady minutes throughout the week and the casual member have twice the average minutes of the member riders.
+
+#### (Yearly) Total ride by Customer Type per days and months in the past 1 year
+
+The next data i'll be looking at is the total ride for each days, which can be seen as below
+
+```{r}
 data_combined %>%
   group_by(member_casual, day_of_week) %>%
   summarise(total_rides = n()) %>%
@@ -468,8 +489,11 @@ data_combined %>%
     size = 4
   ) +
   theme(axis.text.x = element_text (angle = 45))
+```
 
-#Total ride by Customer Type per Month in the past 1 year
+and the total ride for each member types per month, as below
+
+```{r}
 data_combined %>%
   group_by(member_casual, month_ride) %>%
   summarise(total_rides = n()) %>%
@@ -489,13 +513,15 @@ data_combined %>%
     size = 4
   ) +
   theme(axis.text.x = element_text (angle = 45))
+```
 
-## Conclusion 2:
-## Casual riders have double the average ride minutes of member riders
-## On colder months such as november - april, numbers of riders do go down.
-## overall we had more member riders ride throughout the weekdays, but more casual riders on the weekends.
+based on these two graphs, we can see that casual member ride more on weekends and bike rides are not preferred in the colder months
 
-#Bicycle Type preferred by customer type in the past 1 year
+#### Bicycle Type preferred by customer type in the past 1 year
+
+And lastly i will be looking at the bike type preferred by each member type
+
+```{r}
 data_combined %>%
   group_by(member_casual, rideable_type) %>%
   summarise(total_rides = n()) %>%
@@ -514,6 +540,22 @@ data_combined %>%
     hjust = 0.5,
     size = 4
   )
-## Conclusion 3:
-## Classic bike is preferred by member riders, whereas electric bikes are distributed evenly between member and casual riders.
-## docked bike are only used by casual riders.
+```
+
+here we can see that docked bike is used only by casual rider, and member rider like classic bike the most, while the electric bike are used equally between the casual and the member
+
+## Conclusion
+#### The Key Point
+
+* Casual riders ride more on weekends, Member ride consistently throughout the weeks.
+* Casual riders have twice the average minutes of member riders.
+* Winter months have less customer.
+* 42.4% of the riders are casual type.
+* Docked bike is the less used type of bike, and only used by some casual riders.
+
+## Possible Recommendation
+* Reduce the amount of docked bike to minimize cost.
+* Give annual casual riders a discount to upgrade them to annual membership.
+* Advertise more on being an annual membership benefit.
+* Make the weekend price higher for the casual member so that they consider upgrading to member.
+* Gave discount or heating equipment on bike ride during winter months.
